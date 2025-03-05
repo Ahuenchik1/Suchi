@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="app">
+    <!-- Блок информации о доставке -->
+    <div class="delivery-info py-3">
+        <div class="container">
+            <div class="delivery-grid">
+                <!-- Основные элементы -->
+                <div class="delivery-item">
+                    <i class="bi bi-truck me-2"></i>
+                    <div class="delivery-text">
+                        <strong>Бесплатная доставка</strong>
+                        <span>по р.п. Соколовый, другие района уточняйте по телефону</span>
+                    </div>
+                </div>
+                <div class="delivery-item">
+                    <i class="bi bi-gift me-2"></i>
+                    <div class="delivery-text">
+                        <strong>Подарок на выбор</strong>
+                        <span>при заказе от 1000 ₽</span>
+                    </div>
+                </div>
+                <div class="delivery-item">
+                    <i class="bi bi-box2-heart me-2"></i>
+                    <div class="delivery-text">
+                        <strong>Пицца в подарок</strong>
+                        <span>при заказе от 2000 ₽</span>
+                    </div>
+                </div>
+                <div class="delivery-item">
+                    <i class="bi bi-stars me-2"></i>
+                    <div class="delivery-text">
+                        <strong>Бесплатный набор специй</strong>
+                        <span>при заказе от 500 ₽</span>
+                    </div>
+                </div>
+                <div class="delivery-item">
+                    <i class="bi bi-cup-straw me-2"></i>
+                    <div class="delivery-text">
+                        <strong>Лимонад в подарок</strong>
+                        <span>при заказе от трех пицц</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Индикаторы прокрутки -->
+            <div class="delivery-scroll-indicators d-lg-none">
+                <div class="scroll-indicator active"></div>
+                <div class="scroll-indicator"></div>
+                <div class="scroll-indicator"></div>
+                <div class="scroll-indicator"></div>
+                <div class="scroll-indicator"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Фильтр категорий -->
+    <div class="category-nav shadow-sm">
+        <div class="container">
+            <div class="nav-scroll">
+                <button v-for="category in categories" 
+                        :key="category.id"
+                        class="btn category-btn"
+                        :class="{'btn-primary': activeSection === category.slug}"
+                        @click="scrollToCategory(category.slug)">
+                    {% raw %}{{ category.name }}{% endraw %}
+                </button>
+            </div>
+            <button class="btn btn-outline-primary cart-button" 
+                    @click="showCart = true">
+                <i class="bi bi-cart3"></i>
+                <span v-if="cart.length" 
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {% raw %}{{ cart.length }}{% endraw %}
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <main class="container py-4">
+        <!-- Блок "Часто заказывают" -->
+        <div class="popular-products">
+            <h2 class="popular-products-title">Часто заказывают</h2>
+            <div class="popular-products-grid">
+                <div v-for="product in popularProducts" 
+                     :key="product.id" 
+                     class="popular-product-card"
+                     @click="showProductDetails(product)">
+                    <img :src="product.image_path" :alt="product.name">
+                    <div class="product-info">
+                        <div class="product-name">{% raw %}{{ product.name }}{% endraw %}</div>
+                        <div class="product-price">
+                            <template v-if="product.category_name === 'Пицца'">от </template>
+                            {% raw %}{{ product.price }}{% endraw %} ₽
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блоки категорий -->
+        <section v-for="category in categories" 
+                 :key="category.id" 
+                 :id="category.slug"
+                 class="mb-5">
+            <h2 class="mb-4">{% raw %}{{ category.name }}{% endraw %}</h2>
+            <div class="row gy-4">
+                <div v-for="product in getProductsByCategory(category.id)" 
+                     :key="product.id" 
+                     class="col-12 col-md-3">
+                    <product-card 
+                        :product="product"
+                        @add-to-cart="addToCart">
+                    </product-card>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальное окно продукта -->
+    {% include 'components/product-modal.html' %}
+    
+    <!-- Модальное окно корзины -->
+    {% include 'components/cart-modal.html' %}
+    
+    <!-- Плавающая кнопка корзины для мобильных -->
+    <button v-if="!productModal?._isShown" 
+            class="floating-cart-button d-md-none" 
+            @click="showCart = true">
+        <i class="bi bi-cart3"></i>
+        <span class="cart-badge" v-if="cart.length">{% raw %}{{ cart.length }}{% endraw %}</span>
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/components/product-modal.js') }}"></script>
+
+{% endblock %} 

@@ -1,0 +1,242 @@
+<div class="modal fade product-modal" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" data-bs-keyboard="true">
+    <div class="modal-dialog modal-fullscreen-md-down modal-lg">
+        <!-- Кнопка закрытия для десктопа -->
+        <button type="button" 
+                class="modal-close-button d-none d-md-flex" 
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                tabindex="-1">
+            <span class="btn-close"></span>
+        </button>
+        <div class="modal-content">
+            <template v-if="selectedProduct">
+                <!-- Заголовок только для мобильных -->
+                <div class="modal-header border-0 d-md-none">
+                    <div class="d-flex align-items-center">
+                        <h5 class="modal-title mb-0" id="productModalLabel" tabindex="-1">{% raw %}{{ selectedProduct?.name }}{% endraw %}</h5>
+                    </div>
+                    <button type="button" 
+                            class="btn-close" 
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть"
+                            tabindex="-1">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Левая колонка с изображением -->
+                        <div class="col-12 col-md-6 mb-3 mb-md-0">
+                            <img v-if="selectedProduct" 
+                                 :src="selectedProduct.image_path" 
+                                 :alt="selectedProduct.name" 
+                                 class="img-fluid rounded w-100 h-auto">
+                        </div>
+                        
+                        <!-- Правая колонка с информацией -->
+                        <div class="col-12 col-md-6 product-info-column" v-if="selectedProduct">
+                            <div class="d-flex align-items-center mb-3 product-title-container">
+                                <h3 class="mb-0 me-3 d-none d-md-block">{% raw %}{{ selectedProduct.name }}{% endraw %}</h3>
+                            </div>
+                            <div class="product-info-content">
+                                <p class="text-muted mb-2">{% raw %}{{ selectedProduct.description }}{% endraw %}</p>
+                                
+                                <!-- Ингредиенты для всех категорий кроме сетов -->
+                                <div v-if="selectedProduct.category_name !== 'Сеты' && productIngredients && productIngredients.length" class="ingredients-list mb-4">
+                                    <div v-for="ingredient in productIngredients" 
+                                         :key="ingredient.id" 
+                                         class="ingredient-item">
+                                        <span :class="{
+                                            'ingredient-removable': !ingredient.is_default,
+                                            'ingredient-removed': !ingredient.selected && !ingredient.is_default
+                                        }">
+                                            {% raw %}{{ ingredient?.name || '' }}{% endraw %}
+                                            <i v-if="!ingredient.is_default" 
+                                               class="bi ingredient-action"
+                                               :class="{
+                                                   'bi-x-lg': ingredient.selected,
+                                                   'bi-arrow-counterclockwise restore': !ingredient.selected
+                                               }"
+                                               @click="ingredient.selected = !ingredient.selected">
+                                            </i>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Специи для роллов, суши и сетов -->
+                                <div v-if="[
+                                    'Роллы ФУТОМАКИ',
+                                    'Роллы УРАМАКИ',
+                                    'Теплые роллы',
+                                    'Суши классические',
+                                    'Суши спайси',
+                                    'Сеты'
+                                ].includes(selectedProduct?.category_name) && condiments?.length" 
+                                     class="condiments-section mb-4">
+                                    <h5 class="mb-3">Добавить специи</h5>
+                                    <div class="row g-2">
+                                        <div v-for="condiment in condiments" 
+                                             :key="condiment.id" 
+                                             class="col-6">
+                                            <div class="condiment-card">
+                                                <div class="condiment-image">
+                                                    <img :src="condiment.image_path" 
+                                                         :alt="condiment.name" 
+                                                         class="condiment-img me-2">
+                                                </div>
+                                                <div class="condiment-info">
+                                                    <div class="condiment-name">{% raw %}{{ condiment.name }}{% endraw %}</div>
+                                                    <div class="condiment-price text-muted">
+                                                        +{% raw %}{{ condiment.price }}{% endraw %} ₽
+                                                    </div>
+                                                </div>
+                                                <div class="quantity-controls">
+                                                    <button class="btn btn-sm btn-outline-secondary" 
+                                                            @click="decreaseCondiment(condiment)"
+                                                            :disabled="!getCondimentQuantity(condiment.id)">
+                                                        <i class="bi bi-dash"></i>
+                                                    </button>
+                                                    <span class="mx-2">{% raw %}{{ getCondimentQuantity(condiment.id) }}{% endraw %}</span>
+                                                    <button class="btn btn-sm btn-outline-secondary" 
+                                                            @click="increaseCondiment(condiment)">
+                                                        <i class="bi bi-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Опции для пиццы -->
+                                <template v-if="selectedProduct?.category_name === 'Пицца' && pizzaDough && pizzaSizes">
+                                    <!-- Размер -->
+                                    <div class="mb-4">
+                                        <h5 class="mb-3">Размер</h5>
+                                        <div class="size-selector w-100">
+                                            <button v-for="size in pizzaSizes" 
+                                                    :key="size.id"
+                                                    class="size-option"
+                                                    :class="{'active': selectedSize === size.id}"
+                                                    @click="selectSize(size)">
+                                                <div class="size-value">{% raw %}{{ size?.value || 0 }}{% endraw %} см</div>
+                                                <div class="size-price">{% raw %}{{ calculatePriceForSize(size) }}{% endraw %} ₽</div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Тесто -->
+                                    <div class="mb-4">
+                                        <h5 class="mb-3">Тесто</h5>
+                                        <div class="dough-selector">
+                                            <button v-for="dough in pizzaDough" 
+                                                    :key="dough.id"
+                                                    class="dough-option"
+                                                    :class="{'active': selectedDough === dough.id}"
+                                                    @click="selectDough(dough)">
+                                                {% raw %}{{ dough?.name || '' }}{% endraw %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Дополнительные ингредиенты -->
+                                    <div v-if="pizzaToppings && pizzaToppings.length" class="mb-4">
+                                        <h5 class="mb-3">Добавить в пиццу</h5>
+                                        <div class="row g-2 row-cols-2">
+                                            <div v-for="topping in pizzaToppings" 
+                                                 :key="topping.id" 
+                                                 class="col">
+                                                <div class="topping-card">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" 
+                                                               type="checkbox" 
+                                                               v-model="selectedToppings"
+                                                               :value="topping.id"
+                                                               :id="'topping-' + topping.id">
+                                                        <label class="form-check-label w-100" :for="'topping-' + topping.id">
+                                                            <div class="topping-image-wrapper">
+                                                                <img :src="topping.image_path" 
+                                                                     :alt="topping.name" 
+                                                                     class="topping-img">
+                                                            </div>
+                                                            <div class="topping-name">{% raw %}{{ topping?.name || '' }}{% endraw %}</div>
+                                                            <div class="topping-price">+{% raw %}{{ topping.price }}{% endraw %} ₽</div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Кнопка заказа для десктопа -->
+                            <div class="modal-footer-fixed d-none d-md-block">
+                                <div class="container">
+                                    <div v-if="isEditMode">
+                                        <button class="btn btn-primary btn-lg w-100" @click="updateCartItem">
+                                            Сохранить изменения
+                                        </button>
+                                    </div>
+                                    <div v-else-if="!getCurrentCartItem">
+                                        <button class="btn btn-primary btn-lg w-100" @click="addToCart">
+                                            В корзину за {% raw %}{{ calculateTotalPrice }}{% endraw %} ₽
+                                        </button>
+                                    </div>
+                                    <div v-else>
+                                        <div class="btn-group w-100">
+                                            <button class="btn btn-outline-primary btn-lg" @click="decreaseQuantity">
+                                                <i class="bi bi-dash"></i>
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-lg" disabled>
+                                                {% raw %}{{ getCurrentCartItem.quantity }}{% endraw %}
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-lg" @click="increaseQuantity">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Фиксированная кнопка внизу только для мобильных -->
+                <div class="modal-footer-fixed d-block d-md-none">
+                    <div class="container">
+                        <div v-if="isEditMode" class="desktop-cart-button">
+                            <button class="btn btn-primary btn-lg w-100" 
+                                    @click="updateCartItem"
+                                    tabindex="-1">
+                                Сохранить изменения
+                            </button>
+                        </div>
+                        <div v-else-if="!getCurrentCartItem" class="desktop-cart-button">
+                            <button class="btn btn-primary btn-lg w-100" 
+                                    @click="addToCart"
+                                    tabindex="-1">
+                                В корзину за {% raw %}{{ calculateTotalPrice }}{% endraw %} ₽
+                            </button>
+                        </div>
+                        <div v-else>
+                            <div class="btn-group w-100">
+                                <button class="btn btn-outline-primary btn-lg" 
+                                        @click="decreaseQuantity"
+                                        tabindex="-1">
+                                    <i class="bi bi-dash"></i>
+                                </button>
+                                <button class="btn btn-outline-primary btn-lg" 
+                                        disabled
+                                        tabindex="-1">
+                                    {% raw %}{{ getCurrentCartItem.quantity }}{% endraw %}
+                                </button>
+                                <button class="btn btn-outline-primary btn-lg" 
+                                        @click="increaseQuantity"
+                                        tabindex="-1">
+                                    <i class="bi bi-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div> 

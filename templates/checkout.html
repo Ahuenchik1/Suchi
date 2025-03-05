@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="checkout-page" id="checkout">
+    <!-- Сообщение об ошибке -->
+    <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        {% raw %}{{ error }}{% endraw %}
+        <button type="button" class="btn-close" @click="error = null"></button>
+    </div>
+
+    <!-- Прогресс оформления -->
+    <div class="checkout-progress">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Кнопка возврата в меню -->
+                <button @click="backToMenu" class="btn btn-link text-decoration-none ps-0">
+                    <i class="bi bi-arrow-left"></i> Вернуться в меню
+                </button>
+                
+                <!-- Индикаторы прогресса -->
+                <div class="progress-steps">
+                    <div class="step completed">
+                        <span class="step-number">1</span>
+                        <span class="step-text">Корзина</span>
+                    </div>
+                    <div class="step active">
+                        <span class="step-number">2</span>
+                        <span class="step-text">Оформление заказа</span>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <span class="step-text">Заказ принят</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row" :class="{ 'mobile-layout': isMobile }">
+            <!-- Форма оформления -->
+            <div class="col-md-8">
+                <div class="checkout-form card">
+                    <div class="card-body">
+                        <!-- Сводка заказа для мобильных -->
+                        <div class="d-md-none mb-4">
+                            <h5 class="mb-3">Ваш заказ</h5>
+                            <div class="mobile-order-summary">
+                                <button class="toggle-order-items w-100 text-start" @click="toggleOrderItems">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{% raw %}{{ cart.length }}{% endraw %} товара в заказе</span>
+                                        <div class="d-flex align-items-center">
+                                            <span class="me-2">{% raw %}{{ totalAmount }}{% endraw %} ₽</span>
+                                            <i class="bi" :class="orderItemsExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                                        </div>
+                                    </div>
+                                </button>
+                                
+                                <div class="order-items" :class="{ 'expanded': orderItemsExpanded }">
+                                    <div v-for="item in cart" class="order-item">
+                                        <div class="order-item-header d-flex justify-content-between align-items-start mb-2">
+                                            <div class="order-item-title">
+                                                <h6 class="mb-0">{% raw %}{{ item.name }}{% endraw %}</h6>
+                                                <div class="text-muted small">
+                                                    {% raw %}{{ item.quantity }}{% endraw %} шт × {% raw %}{{ item.price }}{% endraw %} ₽
+                                                </div>
+                                            </div>
+                                            <div class="order-item-total fw-bold">
+                                                {% raw %}{{ item.totalPrice }}{% endraw %} ₽
+                                            </div>
+                                        </div>
+
+                                        <!-- Характеристики пиццы -->
+                                        <div v-if="item.category_name === 'Пицца'" class="order-item-details">
+                                            <div v-if="item.options && item.options.size && item.options.dough" 
+                                                 class="order-item-option">
+                                                {% raw %}{{ item.options.size.value }}{% endraw %} см, 
+                                                {% raw %}{{ item.options.dough.name }}{% endraw %}
+                                            </div>
+                                            <div v-if="item.options && item.options.removedIngredients && item.options.removedIngredients.length" 
+                                                 class="order-item-option">
+                                                <span class="text-danger">Без:</span> 
+                                                {% raw %}{{ item.options.removedIngredients.join(', ') }}{% endraw %}
+                                            </div>
+                                            <div v-if="item.options && item.options.addedToppings && item.options.addedToppings.length" 
+                                                 class="order-item-option">
+                                                <span class="text-success">Добавки:</span> 
+                                                {% raw %}{{ item.options.addedToppings.join(', ') }}{% endraw %}
+                                            </div>
+                                        </div>
+
+                                        <!-- Выбранные специи -->
+                                        <div v-if="item.condiments && item.condiments.length" 
+                                             class="order-item-option">
+                                            <span class="text-primary">Специи:</span> 
+                                            {% raw %}{{ item.condiments.map(c => c.name).join(', ') }}{% endraw %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="order-summary-details">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Доставка:</span>
+                                        <span v-if="needDeliveryFee">{% raw %}{{ deliveryPrice }}{% endraw %} ₽</span>
+                                        <span v-else class="text-success">Бесплатно</span>
+                                    </div>
+                                    <div v-if="needDeliveryFee" class="small text-muted mb-2">
+                                        До бесплатной доставки не хватает {% raw %}{{ freeDeliveryThreshold - subtotal }}{% endraw %} ₽
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Контактные данные -->
+                        <div class="mb-4">
+                            <h5>Контактные данные</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Имя*</label>
+                                    <input type="text" class="form-control" v-model="form.name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Телефон*</label>
+                                    <input type="tel" class="form-control" v-model="form.phone" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Доставка -->
+                        <div class="mb-4">
+                            <h5>Доставка</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Адрес доставки*</label>
+                                <input type="text" class="form-control" v-model="form.address" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Время доставки</label>
+                                    <select class="form-select" 
+                                            v-model="form.deliverySlot"
+                                            :disabled="loadingSlots">
+                                        <option value="asap">В ближайшее время (~ 40 минут)</option>
+                                        <template v-if="deliverySlots && deliverySlots.length">
+                                            <option v-for="slot in deliverySlots" 
+                                                    :key="slot.time_start"
+                                                    :value="slot.time_start"
+                                                    :disabled="slot.slots_left === 0">
+                                                {% raw %}{{ formatDeliveryTime(slot) }}{% endraw %}
+                                            </option>
+                                        </template>
+                                        <template v-else>
+                                            <option value="" disabled>Нет доступных слотов на сегодня</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-text" v-if="deliverySlots && deliverySlots.length === 0">
+                                Вы можете выбрать доставку в ближайшее время или добавить новые слоты в панели управления
+                            </div>
+                            <div v-if="loadingSlots" class="text-muted small mt-1">
+                                <i class="bi bi-clock"></i> Загрузка доступного времени...
+                            </div>
+                        </div>
+
+                        <!-- Оплата -->
+                        <div class="mb-4">
+                            <h5>Способ оплаты</h5>
+                            <div class="payment-methods">
+                                <div class="form-check" v-for="method in paymentMethods">
+                                    <input class="form-check-input" 
+                                           type="radio" 
+                                           :id="method.id"
+                                           :value="method.id"
+                                           v-model="form.paymentMethod">
+                                    <label class="form-check-label" :for="method.id">
+                                        <i class="bi" :class="method.icon"></i>
+                                        {% raw %}{{ method.name }}{% endraw %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сводка заказа -->
+            <div class="col-md-4 d-none d-md-block">
+                <div class="order-summary card">
+                    <div class="card-body">
+                        <!-- Заголовок с кнопкой сворачивания -->
+                        <div class="order-summary-header d-flex align-items-center justify-content-between mb-4">
+                            <h5 class="mb-0">Ваш заказ</h5>
+                            <button class="btn-collapse d-md-none" @click="toggleSummary">
+                                <i class="bi" :class="summaryCollapsed ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                            </button>
+                        </div>
+
+                        <!-- Содержимое сводки заказа -->
+                        <div class="order-summary-content" :class="{ 'collapsed': summaryCollapsed }">
+                            <!-- Кнопка раскрытия списка товаров (для мобильных) -->
+                            <button class="toggle-order-items d-md-none" @click="toggleOrderItems">
+                                <span>{% raw %}{{ cart.length }}{% endraw %} товара в заказе</span>
+                                <i class="bi" :class="orderItemsExpanded ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                            </button>
+
+                            <div class="order-items" :class="{ 'expanded': orderItemsExpanded }">
+                                <div v-for="item in cart" class="order-item">
+                                    <div class="order-item-header d-flex justify-content-between align-items-start mb-2">
+                                        <div class="order-item-title">
+                                            <h6 class="mb-0">{% raw %}{{ item.name }}{% endraw %}</h6>
+                                            <div class="text-muted small">
+                                                {% raw %}{{ item.quantity }}{% endraw %} шт × {% raw %}{{ item.price }}{% endraw %} ₽
+                                            </div>
+                                        </div>
+                                        <div class="order-item-total fw-bold">
+                                            {% raw %}{{ item.totalPrice }}{% endraw %} ₽
+                                        </div>
+                                    </div>
+
+                                    <!-- Характеристики пиццы -->
+                                    <div v-if="item.category_name === 'Пицца'" class="order-item-details">
+                                        <div v-if="item.options && item.options.size && item.options.dough" 
+                                             class="order-item-option">
+                                            {% raw %}{{ item.options.size.value }}{% endraw %} см, 
+                                            {% raw %}{{ item.options.dough.name }}{% endraw %}
+                                        </div>
+                                        <div v-if="item.options && item.options.removedIngredients && item.options.removedIngredients.length" 
+                                             class="order-item-option">
+                                            <span class="text-danger">Без:</span> 
+                                            {% raw %}{{ item.options.removedIngredients.join(', ') }}{% endraw %}
+                                        </div>
+                                        <div v-if="item.options && item.options.addedToppings && item.options.addedToppings.length" 
+                                             class="order-item-option">
+                                            <span class="text-success">Добавки:</span> 
+                                            {% raw %}{{ item.options.addedToppings.join(', ') }}{% endraw %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Выбранные специи -->
+                                    <div v-if="item.condiments && item.condiments.length" 
+                                         class="order-item-option">
+                                        <span class="text-primary">Специи:</span> 
+                                        {% raw %}{{ item.condiments.map(c => c.name).join(', ') }}{% endraw %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-summary-footer">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Доставка:</span>
+                                <span v-if="needDeliveryFee">{% raw %}{{ deliveryPrice }}{% endraw %} ₽</span>
+                                <span v-else class="text-success">Бесплатно</span>
+                            </div>
+                            <div v-if="needDeliveryFee" class="small text-muted mb-2">
+                                До бесплатной доставки не хватает {% raw %}{{ freeDeliveryThreshold - subtotal }}{% endraw %} ₽
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <div>
+                                    <strong>Итого:</strong>
+                                    <div v-if="needDeliveryFee" class="small text-muted">
+                                        Товары: {% raw %}{{ subtotal }}{% endraw %} ₽
+                                    </div>
+                                </div>
+                                <strong>{% raw %}{{ totalAmount }}{% endraw %} ₽</strong>
+                            </div>
+                            <button class="btn btn-primary w-100" 
+                                    @click="submitOrder"
+                                    :disabled="!isFormValid || loading">
+                                <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                                Оформить заказ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка оформления заказа для мобильных -->
+    <div class="mobile-checkout-button d-md-none">
+        <button class="btn btn-primary w-100" 
+                @click="submitOrder"
+                :disabled="!isFormValid || loading">
+            <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+            Оформить заказ за {% raw %}{{ totalAmount }}{% endraw %} ₽
+        </button>
+    </div>
+</div>
+{% endblock %} 

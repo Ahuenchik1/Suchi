@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="order-success-page" id="orderSuccessApp">
+    <div class="container py-4">
+        <div v-if="loading" class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Загрузка...</span>
+            </div>
+        </div>
+        <div v-else-if="error" class="alert alert-danger">
+            {% raw %}{{ error }}{% endraw %}
+        </div>
+        <div v-else-if="order" class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle text-success display-1 mb-4"></i>
+                <h2 class="mb-4">Заказ №{% raw %}{{ orderId }}{% endraw %} успешно оформлен!</h2>
+                
+                <!-- Информация о заказе -->
+                <div class="order-info text-start mb-4">
+                    <p><strong>Время доставки:</strong> {% raw %}{{ formattedDeliveryTime }}{% endraw %}</p>
+                    <p><strong>Адрес доставки:</strong> {% raw %}{{ order.address }}{% endraw %}</p>
+                    <p><strong>Сумма заказа:</strong> {% raw %}{{ order.total_amount }}{% endraw %} ₽</p>
+                </div>
+
+                <!-- Блок оплаты -->
+                <div v-if="order.payment_method === 'cash'" class="payment-info alert alert-info">
+                    <h4>Оплата наличными</h4>
+                    <p>Подготовьте, пожалуйста, {% raw %}{{ order.total_amount }}{% endraw %} ₽ к приезду курьера</p>
+                </div>
+
+                <div v-else-if="order.payment_method === 'card'" class="payment-info">
+                    <div v-if="!order.is_paid" class="alert alert-warning">
+                        <h4>Ожидание оплаты</h4>
+                        <p>Перенаправление на страницу оплаты...</p>
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+                    <div v-else class="alert alert-success">
+                        <h4>Заказ оплачен</h4>
+                        <p>Спасибо за оплату! Мы начали готовить ваш заказ.</p>
+                    </div>
+                </div>
+
+                <div v-else-if="order.payment_method === 'sbp'" class="payment-info">
+                    <div v-if="!order.is_paid" class="alert alert-warning">
+                        <h4>Оплата через СБП</h4>
+                        <div class="qr-code mb-3">
+                            <img :src="sbpQrCode" alt="QR-код для оплаты" v-if="sbpQrCode">
+                            <div v-else class="spinner-border" role="status">
+                                <span class="visually-hidden">Загрузка QR-кода...</span>
+                            </div>
+                        </div>
+                        <p>Отсканируйте QR-код в приложении вашего банка для оплаты</p>
+                    </div>
+                    <div v-else class="alert alert-success">
+                        <h4>Заказ оплачен</h4>
+                        <p>Спасибо за оплату! Мы начали готовить ваш заказ.</p>
+                    </div>
+                </div>
+
+                <!-- Кнопка возврата на главную -->
+                <a href="/" class="btn btn-primary mt-4">Вернуться на главную</a>
+            </div>
+        </div>
+        <div v-else class="alert alert-danger">
+            Не удалось загрузить информацию о заказе
+        </div>
+    </div>
+</div>
+{% endblock %} 

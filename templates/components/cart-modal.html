@@ -1,0 +1,153 @@
+<div class="modal fade cart-modal-right" 
+     id="cartModal" 
+     tabindex="-1" 
+     role="dialog" 
+     aria-labelledby="cartModalLabel"
+     data-bs-keyboard="true" 
+     @keydown.esc="showCart = false">
+    <div class="modal-dialog modal-dialog-right">
+        <div class="modal-content h-100">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title" id="cartModalLabel" v-if="cart.length">
+                    {% raw %}{{ cart.length }} {{ pluralize(cart.length, ['товар', 'товара', 'товаров']) }} на {{ calculateTotal() }} ₽{% endraw %}
+                </h5>
+                <h5 class="modal-title" v-else>Корзина пуста</h5>
+                <button type="button" class="btn-close" @click="showCart = false"></button>
+            </div>
+            
+            <div class="modal-body p-0">
+                <!-- Пустая корзина -->
+                <div v-if="!cart.length" class="text-center py-5">
+                    <i class="bi bi-cart3 display-1 text-muted mb-3"></i>
+                    <p class="text-muted">Добавьте что-нибудь из меню</p>
+                    <button class="btn btn-primary" @click="showCart = false">
+                        Перейти к меню
+                    </button>
+                </div>
+
+                <div v-else class="cart-content">
+                    <!-- Список товаров -->
+                    <div class="cart-items">
+                        <div v-for="item in cart" :key="generateCartKey(item)" class="cart-item">
+                            <div class="d-flex">
+                                <!-- Изображение -->
+                                <img :src="item.image_path" :alt="item.name" class="cart-item-image">
+                                
+                                <div class="cart-item-content flex-grow-1">
+                                    <!-- Заголовок и кнопка удаления -->
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1">{% raw %}{{ item.name }}{% endraw %}</h6>
+                                        <button class="btn btn-link text-danger p-0" 
+                                                @click="removeFromCart(item)">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Опции для пиццы -->
+                                    <div v-if="item.options.size && item.options.dough" 
+                                         class="small text-muted mb-1">
+                                        {% raw %}{{ item.options.size.value }}{% endraw %} см, 
+                                        {% raw %}{{ item.options.dough.name }}{% endraw %}
+                                    </div>
+                                    
+                                    <!-- Основные ингредиенты -->
+                                    <div v-if="item.ingredients && item.ingredients.length" class="mb-1">
+                                        <div class="ingredients-list small text-muted">
+                                            {% raw %}{{ item.ingredients.join(', ') }}{% endraw %}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Специи -->
+                                    <div v-if="item.options.condiments && item.options.condiments.length" 
+                                         class="mb-1">
+                                        <div class="ingredients-list small">
+                                            <span class="text-primary">Специи: </span>
+                                            <span class="text-muted">
+                                                {% raw %}{{ item.options.condiments.map(c => `${c.name} (${c.quantity} шт.)`).join(', ') }}{% endraw %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Дополнительные ингредиенты -->
+                                    <div v-if="item.options.toppings && item.options.toppings.length" class="mb-2">
+                                        <div class="additional-ingredients small">
+                                            <span class="text-primary">Дополнительно: </span>
+                                            <span class="text-muted">
+                                                {% raw %}{{ item.options.toppings.map(t => t.name).join(', ') }}{% endraw %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Цена и управление -->
+                            <div class="cart-item-controls">
+                                <div class="price">
+                                    <span class="fw-bold">{% raw %}{{ item.totalPrice }}{% endraw %} ₽</span>
+                                </div>
+                                <div class="controls-group">
+                                    <button v-if="canBeModified(item)" 
+                                            class="btn btn-link text-primary"
+                                            @click="modifyItem(item)">
+                                        Изменить
+                                    </button>
+                                    <div class="input-group input-group-sm">
+                                        <button class="btn btn-outline-secondary" 
+                                                @click="decreaseQuantity(item)">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="text" class="form-control text-center" 
+                                               :value="item.quantity" readonly>
+                                        <button class="btn btn-outline-secondary" 
+                                                @click="increaseQuantity(item)">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительные предложения -->
+                    <div class="additional-offers" v-if="additionalOffers.length">
+                        <h6 class="offers-title">Добавить к заказу?</h6>
+                        <div class="offers-grid">
+                            <div v-for="offer in additionalOffers" 
+                                 :key="offer.id" 
+                                 class="offer-item">
+                                <img :src="offer.image_path" :alt="offer.name">
+                                <div class="offer-details">
+                                    <h6>{% raw %}{{ offer.name }}{% endraw %}</h6>
+                                    <p class="small text-muted">{% raw %}{{ offer.description }}{% endraw %}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="price">{% raw %}{{ offer.price }}{% endraw %} ₽</span>
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                @click="addToCart(offer)">
+                                            Добавить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Футер с итогом -->
+            <div v-if="cart.length" class="modal-footer flex-column">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3">
+                    <span class="fs-5">Итого:</span>
+                    <span class="fs-5 fw-bold">{% raw %}{{ calculateTotal() }}{% endraw %} ₽</span>
+                </div>
+                <button class="btn btn-primary w-100" 
+                        :disabled="calculateTotal() < 600"
+                        @click="proceedToCheckout">
+                    Оформить заказ
+                </button>
+                <div v-if="calculateTotal() < 600" class="small text-danger w-100 text-center">
+                    Минимальная сумма заказа: 600 ₽
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

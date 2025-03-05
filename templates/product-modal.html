@@ -1,0 +1,59 @@
+  <div v-if="showNutrition" 
+       class="nutrition-popup"
+       @click.stop>
+      <div class="nutrition-content">
+          <div class="title">Пищевая ценность на 100 г</div>
+          <div class="nutrition-list">
+              <div class="nutrition-label">Калорийность</div>
+              <div class="nutrition-value">{% raw %}{{ selectedProduct.nutrition ? selectedProduct.nutrition.calories : '?' }}{% endraw %} ккал</div>
+              <div class="nutrition-label">Белки</div>
+              <div class="nutrition-value">{% raw %}{{ selectedProduct.nutrition ? selectedProduct.nutrition.proteins : '?' }}{% endraw %} г</div>
+              <div class="nutrition-label">Жиры</div>
+              <div class="nutrition-value">{% raw %}{{ selectedProduct.nutrition ? selectedProduct.nutrition.fats : '?' }}{% endraw %} г</div>
+              <div class="nutrition-label">Углеводы</div>
+              <div class="nutrition-value">{% raw %}{{ selectedProduct.nutrition ? selectedProduct.nutrition.carbohydrates : '?' }}{% endraw %} г</div>
+              <div class="nutrition-label">Вес порции</div>
+              <div class="nutrition-value">{% raw %}{{ selectedProduct.nutrition ? selectedProduct.nutrition.weight : '?' }}{% endraw %} г</div>
+          </div>
+      </div>
+  </div> 
+
+<div class="modal fade product-modal" 
+     id="productModal" 
+     tabindex="-1" 
+     role="dialog"
+     aria-labelledby="productModalLabel">
+    <div class="modal-dialog modal-fullscreen-md-down modal-lg">
+        <!-- Кнопка закрытия для десктопа -->
+        <button type="button" 
+                class="modal-close-button d-none d-md-flex" 
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                tabindex="0">
+            <span class="btn-close"></span>
+        </button>
+        <div class="modal-content">
+            <template v-if="selectedProduct">
+                <!-- Заголовок только для мобильных -->
+                <div class="modal-header border-0 d-md-none">
+                    <div class="d-flex align-items-center">
+                        <h5 class="modal-title mb-0" id="productModalLabel">
+                            {% raw %}{{ selectedProduct?.name }}{% endraw %}
+                        </h5>
+                        <button class="btn btn-link text-decoration-none p-0 ms-2"
+                                @click.stop="showNutrition = !showNutrition"
+                                aria-label="Показать пищевую ценность"
+                                title="Пищевая ценность">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                    </div>
+                    <button type="button" 
+                            class="btn-close" 
+                            data-bs-dismiss="modal"
+                            aria-label="Закрыть">
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,176 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+{% raw %}
+<div id="adminStats" class="statistics-dashboard">
+    <!-- Заголовок -->
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="h3 mb-0">Статистика</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="dashboard-content">
+        <div class="container-fluid">
+            <!-- Переключатель периодов -->
+            <div class="period-selector mb-4">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: period === 'day' }" 
+                           @click="setPeriod('day')" href="#">
+                            Сегодня
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: period === 'week' }" 
+                           @click="setPeriod('week')" href="#">
+                            Неделя
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: period === 'month' }" 
+                           @click="setPeriod('month')" href="#">
+                            Месяц
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" :class="{ active: period === 'year' }" 
+                           @click="setPeriod('year')" href="#">
+                            Год
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Основные метрики -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Выручка</h6>
+                            <h2 class="card-title mb-0">{{ formatCurrency(stats.revenue) }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Заказов</h6>
+                            <h2 class="card-title mb-0">{{ stats.orders_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Средний чек</h6>
+                            <h2 class="card-title mb-0">{{ formatCurrency(stats.average_order) }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Отмены</h6>
+                            <h2 class="card-title mb-0">{{ stats.cancellation_rate }}%</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Графики и таблицы -->
+            <div class="row g-4">
+                <!-- График продаж по времени -->
+                <div class="col-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Динамика продаж</h5>
+                                <button class="btn btn-link" 
+                                        @click="toggleChart" 
+                                        :title="isChartCollapsed ? 'Развернуть график' : 'Свернуть график'">
+                                    <i class="bi" :class="isChartCollapsed ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+                                </button>
+                            </div>
+                            <div class="chart-container" 
+                                 :style="{ height: isChartCollapsed ? '0' : '400px', 
+                                          overflow: 'hidden', 
+                                          transition: 'height 0.3s ease-in-out' }">
+                                <canvas id="salesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Продажи по категориям -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Продажи по категориям</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Категория</th>
+                                            <th>Количество</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="cat in stats.categories" :key="cat.name">
+                                            <td>{{ cat.name }}</td>
+                                            <td>{{ cat.count }}</td>
+                                            <td>{{ formatCurrency(cat.amount) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Топ товаров -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Популярные товары</h5>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Товар</th>
+                                            <th>Продано</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="product in stats.top_products" :key="product.name">
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.count }}</td>
+                                            <td>{{ formatCurrency(product.amount) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endraw %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Vue.js -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- Chart.js для графиков -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin/statistics.js') }}"></script>
+{% endblock %}

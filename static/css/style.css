@@ -1,0 +1,1902 @@
+/* В начало файла добавим стили для body и основного контейнера */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* Футер */
+.footer {
+    flex-shrink: 0;
+}
+
+/* Общие стили */
+:root {
+    --primary-color: #D42E1A;    /* Теплый красный, традиционный японский */
+    --secondary-color: #1A2B3C;   /* Глубокий темно-синий */
+    --accent-color: #E8E2D6;      /* Светлый бежевый для акцентов */
+    --text-color: #2C3E50;        /* Темно-синий для текста */
+    --light-gray: #F8F9FA;
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-headers: 'Montserrat', var(--font-primary);
+}
+
+/* Навигация */
+.category-nav {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1020;
+    padding: 1rem 0;
+}
+
+.category-nav .container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 0.25rem;  /* Добавляем небольшой отступ сверху */
+    padding-bottom: 0.25rem;  /* Добавляем небольшой отступ снизу */
+}
+
+.nav-scroll {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.nav-scroll::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+}
+
+.nav-scroll .btn {
+    flex-shrink: 0;
+}
+
+/* Увеличиваем отступы на мобильных устройствах */
+@media (max-width: 991px) {
+    .nav-scroll {
+        padding: 0 1rem;  /* Увеличенные отступы для мобильных */
+        justify-content: flex-start;  /* Выравнивание по левому краю на мобильных */
+    }
+}
+
+/* Стили для хедера */
+header {
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+/* Контейнер хедера */
+header .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem 1rem;  /* Добавляем вертикальные отступы */
+    display: flex;  /* Добавляем flex-контейнер */
+}
+
+/* Выравнивание содержимого хедера */
+header .d-flex {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 100%;  /* Ограничиваем максимальную ширину */
+    overflow: hidden;  /* Предотвращаем выход за пределы */
+}
+
+/* Стили для телефона в хедере */
+header a[href^="tel"] {
+    font-size: 1.1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    margin-left: auto;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* Контейнер с логотипом */
+header .navbar-brand {
+    display: flex;
+    align-items: center;
+    flex-shrink: 1;
+    min-width: 0;  /* Позволяем логотипу сжиматься */
+    padding: 0.5rem 1;  /* Добавляем отступы сверху и снизу */
+}
+
+/* Стили для изображения логотипа */
+header .navbar-brand img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* Медиа-запрос для адаптивности */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1200px;  /* Фиксированная максимальная ширина */
+    }
+}
+
+/* Стили для кнопок категорий */
+.category-btn {
+    white-space: nowrap;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.875rem;
+    border: none;
+    background-color: #f8f9fa;
+    color: var(--secondary-color);
+    border-radius: 6px;
+    height: 32px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    font-family: var(--font-headers);
+}
+
+.category-btn.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Стили для кнопки корзины */
+.category-nav .cart-button {
+    flex-shrink: 0;  /* Запрещаем сжатие */
+    padding: 0.5rem;
+    height: 32px;
+    width: 32px;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    border-radius: 50%;
+    display: none;  /* Скрываем на мобильных */
+    position: relative;
+}
+
+/* Показываем кнопку корзины только на широких экранах */
+@media (min-width: 992px) {
+    .category-nav .cart-button {
+        display: flex;
+        margin-left: auto;  /* Прижимаем кнопку вправо */
+    }
+}
+
+/* Карточка продукта */
+.product-card {
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.product-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.product-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: var(--font-headers);
+}
+
+.product-card .card-text {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+.price {
+    color: var(--primary-color);
+    font-family: var(--font-headers);
+    font-weight: 600;
+}
+
+/* Стили для модального окна продукта */
+.modal-product .modal-dialog {
+    max-width: 800px;
+}
+
+/* Стили для кнопок выбора размера и теста */
+.btn-group .btn {
+    flex: 1;
+    white-space: normal;
+    padding: 0.5rem;
+}
+
+.btn-group .btn small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Стили для кнопок изменения количества */
+.btn-group .btn {
+    min-width: 46px;
+}
+
+.btn-group .btn:disabled {
+    background-color: transparent;
+    color: var(--primary-color);
+    opacity: 1;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Селектор размера пиццы */
+.size-selector {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.size-option {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.size-option:hover {
+    border-color: var(--primary-color);
+}
+
+.size-option.active {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.size-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.size-price {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* Селектор теста */
+.dough-selector {
+    display: flex;
+    gap: 1rem;
+}
+
+.dough-option {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.dough-option:hover {
+    border-color: var(--primary-color);
+}
+
+.dough-option.active {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Добавляем относительное позиционирование для контейнера с кнопкой */
+.product-title-container {
+    position: relative;
+}
+
+/* Общие стили для всплывающего окна с информацией */
+.nutrition-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 1rem;
+    z-index: 1030;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    width: 300px;
+    max-width: calc(100vw - 2rem);
+}
+
+.nutrition-popup::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid white;
+}
+
+/* Стили для содержимого всплывающего окна */
+.nutrition-content {
+    font-size: 0.875rem;
+}
+
+.nutrition-content .title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.nutrition-content .nutrition-list {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem;
+}
+
+.nutrition-content .nutrition-label {
+    color: #6c757d;
+}
+
+.nutrition-content .nutrition-value {
+    text-align: right;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Стили для списка ингредиентов */
+.ingredients-list {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.ingredients-list .text-primary {
+    font-weight: 500;
+}
+
+.ingredient-item {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    display: inline-flex;
+}
+
+.ingredient-item:not(:last-child)::after {
+    content: ",";
+    margin-right: 0.5rem;
+}
+
+.ingredient-removable {
+    border-bottom: 1px dashed #6c757d;
+    cursor: pointer;
+    position: relative;
+    padding-right: 1.5rem;
+}
+
+/* Стиль для удаленных ингредиентов */
+.ingredient-removed {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.ingredient-action {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #dc3545;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.ingredient-action:hover {
+    opacity: 1;
+}
+
+.ingredient-action.restore {
+    color: #198754;
+}
+
+/* Стили для карточек добавок */
+.topping-card {
+    /*background: var(--accent-color);*/
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.topping-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.topping-card .form-check {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+}
+
+/* Скрываем стандартный чекбокс */
+.topping-card .form-check-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.topping-card .form-check-label {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    cursor: pointer;
+}
+
+/* Стили для выбранной карточки */
+.topping-card .form-check-input:checked ~ .form-check-label {
+    color: var(--primary-color);
+}
+
+.topping-card .form-check-input:checked ~ .form-check-label .topping-price {
+    color: var(--primary-color);
+}
+
+/* Добавляем рамку и фон для выбранной карточки */
+.topping-card .form-check-input:checked + .form-check-label {
+    background-color: rgba(212, 46, 26, 0.05);
+}
+
+.topping-card .form-check-input:checked ~ .form-check-label .topping-image-wrapper {
+    transform: scale(0.95);
+}
+
+/* Стили для карточки при выборе */
+.topping-card:has(.form-check-input:checked) {
+    border-color: var(--primary-color);
+    background-color: rgba(212, 46, 26, 0.05);
+}
+
+.topping-image-wrapper {
+    width: 100%;
+    height: 100px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.topping-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.topping-name {
+    font-weight: 500;
+    margin-bottom: 4px;
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.topping-price {
+    color: #666;
+    font-size: 0.9rem;
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* Стили для фиксированной кнопки в модальном окне */
+.modal-footer-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1050;
+}
+
+/* Добавляем отступ снизу для контента, чтобы он не перекрывался фиксированной кнопкой */
+.modal-body {
+    margin-bottom: 80px;
+}
+
+/* Стили для кнопок в фиксированной панели */
+.modal-footer-fixed .btn-group {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.modal-footer-fixed .container {
+    max-width: 100%;
+    padding: 0 15px;
+    margin: 0 auto;
+}
+
+@media (min-width: 769px) {
+    .modal-footer-fixed {
+        position: relative;
+        box-shadow: none;
+        border-top: 1px solid #dee2e6;
+        padding: 1rem 0;
+        margin-top: 0;
+        width: calc(100% - 1.5rem);  /* Учитываем правый отступ скроллбара */
+    }
+
+    .modal-body {
+        margin-bottom: 0;
+    }
+
+    .modal-footer-fixed .container {
+        padding: 0;
+        width: 100%;
+    }
+
+    .modal-content {
+        height: 600px;  /* Фиксированная высота для десктопа */
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .modal-body {
+        flex: 1;
+        overflow: hidden;  /* Предотвращаем скролл всего модального окна */
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .modal-body .row {
+        height: 100%;
+    }
+
+    /* Стили для правой колонки с прокруткой */
+    .product-info-column {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Контейнер для прокручиваемого контента */
+    .product-info-content {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 0;
+        /*padding-right: 1.5rem;   Возвращаем отступ на контент */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .product-info-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Стили для футера на десктопе */
+    .modal-footer-fixed.d-none.d-md-block {
+        position: static;
+        padding: 1rem 0 1rem 0;
+        background: white;
+        border-top: 1px solid #dee2e6;
+        width: 100%;
+    }
+
+    .modal-footer-fixed.d-none.d-md-block .container {
+        /*padding-right: 1.5rem;   Добавляем такой же отступ как у контента */
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Выравнивание кнопки на десктопе */
+    .modal-footer-fixed.d-none.d-md-block .container > div {
+        display: flex;
+        justify-content: stretch;
+        width: 100%;
+    }
+
+    .modal-footer-fixed.d-none.d-md-block .btn,
+    .modal-footer-fixed.d-none.d-md-block .btn-group {
+        width: 100%;
+        margin: 0;  /* Убираем возможные отступы */
+    }
+
+    /* Стили для модального окна на десктопе */
+    .modal-dialog {
+        position: relative;
+    }
+
+    /* Стили для кнопки закрытия */
+    .modal-close-button {
+        position: absolute;
+        right: -48px;
+        top: 0;
+        background: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 0;
+        z-index: 1060;
+    }
+
+    .modal-close-button:hover {
+        background: #f8f9fa;
+    }
+
+    .modal-close-button .btn-close {
+        margin: 0;
+        padding: 0;
+        width: 16px;
+        height: 16px;
+    }
+
+    .modal-content {
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Убираем отступ сверху */
+    .product-modal .modal-header {
+        display: none;
+    }
+
+    .modal-footer-fixed {
+        box-shadow: 0 -1px 3px rgba(0,0,0,0.05);
+    }
+}
+
+/* Адаптивные стили для модального окна */
+@media (max-width: 768px) {
+    /* Скрываем оригинальную кнопку информации на мобильных */
+    .product-title-container .btn-link {
+        display: none;
+    }
+
+    /* Стили для кнопки информации в хедере */
+    .nutrition-info-mobile {
+        font-size: 1.25rem;
+        color: var(--bs-body-color);
+        opacity: 0.75;
+        margin-top: 2px;
+        position: relative;
+        margin-right: 0.5rem;
+        order: -1;
+    }
+
+    .nutrition-info-mobile:hover {
+        opacity: 1;
+        color: var(--bs-body-color);
+    }
+
+    /* Контейнер для заголовка и кнопки информации */
+    .modal-header .d-flex {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Стили для всплывающего окна на мобильных */
+    .modal-header .nutrition-popup {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 1rem;
+        z-index: 1030;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        width: 300px;
+        max-width: calc(100vw - 2rem);
+    }
+
+    /* Изменяем позицию, если окно выходит за пределы экрана */
+    .modal-header .nutrition-popup.position-top {
+        top: auto;
+        bottom: 100%;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        transform: translateX(-50%);
+    }
+
+    /* Добавляем стрелочку сверху */
+    .modal-header .nutrition-popup::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid white;
+    }
+
+    /* Стрелочка снизу для перевернутого положения */
+    .modal-header .nutrition-popup.position-top::before {
+        top: auto;
+        bottom: -8px;
+        border-bottom: none;
+        border-top: 8px solid white;
+    }
+
+    /* Корректировка позиции при выходе за правый край */
+    .modal-header .nutrition-popup.position-right {
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+
+    /* Корректировка позиции при выходе за левый край */
+    .modal-header .nutrition-popup.position-left {
+        left: 0;
+        transform: none;
+    }
+
+    .modal.fade .modal-dialog {
+        margin: 0;
+        padding-bottom: 80px;
+    }
+
+    .modal-content {
+        height: 100%;
+        border: none;
+        border-radius: 0;
+    }
+
+    .modal-body {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 80px; /* Отступ для фиксированной кнопки */
+    }
+
+    .product-info-column {
+        height: auto;
+    }
+}
+
+/* Стили для кнопки информации на десктопе */
+@media (min-width: 769px) {
+    .nutrition-info-mobile {
+        display: none;  /* Скрываем мобильную версию */
+    }
+
+    .product-title-container .btn-link {
+        display: inline-flex;
+        align-items: center;
+        font-size: 1.25rem;
+        color: var(--bs-body-color);
+        opacity: 0.75;
+        padding: 0;
+        margin-left: 0.5rem;
+    }
+
+    .product-title-container .btn-link:hover {
+        opacity: 1;
+    }
+}
+
+/* Базовые стили для корзины (общие для всех устройств) */
+.cart-item {
+    padding: 1rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+}
+
+/* Стили для списка товаров */
+.cart-items {
+    background: #f8f9fa;
+    padding: 1rem;
+}
+
+.cart-item .d-flex {
+    gap: 1rem;  /* Добавляем отступ между элементами */
+    align-items: center;  /* Выравниваем элементы по центру */
+}
+
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Контейнер с контентом */
+.cart-item-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 80px;  /* Соответствует высоте изображения */
+    justify-content: center;  /* Центрируем содержимое по вертикали */
+}
+
+/* Контейнер с ценой и кнопками */
+.cart-item-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 767px) {
+    .cart-items {
+        padding: 0.75rem;
+    }
+    
+    .cart-item {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Убираем отступ у последнего элемента */
+    .cart-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Основной контейнер с изображением и контентом */
+    .cart-item .d-flex {
+        gap: 0.875rem;    /* Немного уменьшаем отступ на мобильных */
+    }
+    
+    /* Изображение */
+    .cart-item-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Контейнер с контентом */
+    .cart-item-content {
+        min-width: 0;  /* Позволяет контенту сжиматься */
+        width: calc(100% - 75px);  /* Учитываем ширину изображения и отступ */
+        min-height: 60px;  /* Соответствует высоте изображения на мобильных */
+    }
+    
+    /* Контейнер с ценой и кнопками */
+    .cart-item-controls {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    /* Группа кнопок изменения количества */
+    .input-group.input-group-sm {
+        margin-left: auto;  /* Прижимаем к правому краю */
+    }
+    
+    /* Кнопка "Изменить" */
+    .cart-item .btn-link {
+        padding: 0;
+        font-size: 0.875rem;
+    }
+    
+    /* Цена */
+    .cart-item .price {
+        font-size: 1rem;
+        white-space: nowrap;
+    }
+
+    .cart-modal-right .modal-dialog-right {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        max-width: none;
+    }
+
+    .cart-modal-right .modal-content {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        border: none;
+        border-radius: 0;
+    }
+
+    .cart-modal-right .modal-header {
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        background: white;
+    }
+
+    .cart-modal-right .modal-body {
+        flex: 1;
+        overflow: hidden;
+        padding: 0;
+    }
+
+    .cart-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-items {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0.75rem;
+        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+    }
+
+    .cart-modal-right .modal-footer {
+        flex-shrink: 0;
+        background: white;
+        border-top: 1px solid #dee2e6;
+        padding: 1rem;
+        margin: 0;
+        position: sticky;
+        bottom: 0;
+        z-index: 1020;
+    }
+
+    /* Убираем стандартный отступ Bootstrap для модального окна */
+    .modal-dialog {
+        margin: 0;
+    }
+
+    /* Убираем отступ для фиксированной кнопки, так как теперь у нас фиксированный футер */
+    .modal.fade .modal-dialog {
+        padding-bottom: 0;
+    }
+
+    .modal-body {
+        padding-bottom: 0;
+    }
+}
+
+/* Стили для корзины на широких экранах */
+@media (min-width: 768px) {
+    .cart-modal-right .modal-dialog-right {
+        position: fixed;
+        margin: auto;
+        width: 450px;
+        height: 100%;
+        right: 0;
+        top: 0;
+    }
+ 
+    .cart-modal-right .modal-content {
+        border-radius: 0;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+ 
+    /* Стили для заголовка корзины */
+    .cart-modal-right .modal-header {
+        padding: 1rem;
+        background: white;
+        border-bottom: 1px solid #dee2e6;
+        flex-shrink: 0;  /* Запрещаем сжатие */
+    }
+ 
+    .cart-modal-right .modal-header .modal-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin: 0;
+    }
+ 
+    .cart-modal-right .modal-body {
+        flex: 1;
+        overflow: hidden;
+        padding: 0;
+    }
+ 
+    .cart-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+ 
+    .cart-items {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+        /* Скрываем скролл-бар для Firefox */
+        scrollbar-width: none;
+        /* Скрываем скролл-бар для IE и Edge */
+        -ms-overflow-style: none;
+    }
+ 
+    /* Скрываем скролл-бар для Chrome, Safari и Opera */
+    .cart-items::-webkit-scrollbar {
+        display: none;
+    }
+ 
+    .additional-offers {
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+    }
+ 
+    .offers-title {
+        margin-bottom: 1rem;
+    }
+ 
+    .offers-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+ 
+    .offer-item {
+        background: white;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+ 
+    .offer-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+ 
+    /* Футер корзины */
+    .cart-modal-right .modal-footer {
+        flex-shrink: 0;  /* Запрещаем сжатие */
+        background: white;
+        border-top: 1px solid #dee2e6;
+        padding: 1rem;
+        margin: 0;
+    }
+}
+
+/* Стили для плавающей кнопки корзины */
+.floating-cart-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50px;
+    background: var(--primary-color);
+    border: none;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.floating-cart-button .cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Добавляем отступ снизу на мобильных устройствах */
+@media (max-width: 767px) {
+    main {
+        padding-bottom: 80px;  /* Чтобы контент не перекрывался плавающей кнопкой */
+    }
+}
+
+/* Стили для группы кнопок изменения количества */
+.cart-item .input-group.input-group-sm {
+    overflow: hidden;
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    width: 104px;  /* Точная ширина: 32px * 3 + 4px для границ */
+    flex: 0 0 104px;  /* Запрещаем расширение */
+}
+
+.cart-item .input-group.input-group-sm .btn {
+    padding: 0;
+    font-size: 0.875rem;
+    margin: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 50px;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.cart-item .input-group.input-group-sm .btn:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.cart-item .input-group.input-group-sm .form-control {
+    border: none;
+    background: none;
+    text-align: center;
+    padding: 0;
+    font-size: 0.875rem;
+    width: 40px;
+    flex: none;
+    color: #495057;
+    margin: 0;
+    min-height: 32px;
+    line-height: 32px;
+    font-weight: 500;
+}
+
+.cart-item .input-group.input-group-sm .form-control:focus {
+    box-shadow: none;
+}
+
+/* Группируем кнопку "Изменить" и группу кнопок количества */
+.cart-item-controls .controls-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;  /* Прижимаем группу вправо */
+}
+
+/* Стили для секции часто заказываемых продуктов */
+.popular-products {
+    margin: 1.5rem 0;
+}
+
+.popular-products-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.popular-products-grid {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0.5rem;
+}
+
+.popular-product-card {
+    flex: 0 0 auto;
+    width: 240px;
+    padding: 0.75rem;
+    background: var(--accent-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.popular-product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.popular-product-card img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.popular-product-card .product-info {
+    flex: 1;
+    min-width: 0;  /* Для корректного переноса текста */
+}
+
+.popular-product-card .product-name {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.popular-product-card .product-price {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 767px) {
+    .popular-products-grid {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 0.5rem;
+        margin: 0 -0.5rem;
+    }
+
+    .popular-products-grid::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Стили для карточки продукта */
+.product-card {
+    height: 100%;
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 767px) {
+    .product-card {
+        display: flex;
+        flex-direction: row;
+        height: auto;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-radius: 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        margin-bottom: 1rem;
+        align-items: center;  /* Выравниваем все элементы по центру */
+    }
+
+    .product-card .card-img-top {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+        margin: auto 0;  /* Дополнительное выравнивание по вертикали */
+    }
+
+    .product-card .card-body {
+        padding: 0;
+        padding-left: 1rem;
+        flex: 1;  /* Занимаем оставшееся пространство */
+        min-width: 0;  /* Для корректного переноса текста */
+        display: flex;
+        flex-direction: column;  /* Располагаем содержимое вертикально */
+        justify-content: center;  /* Выравниваем содержимое по центру */
+    }
+
+    .product-card .card-title {
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+        line-height: 1.2;
+        color: var(--secondary-color);
+    }
+
+    .product-card .card-text {
+        font-size: 0.875rem;
+        margin-bottom: 0.35rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: #6c757d;
+    }
+
+    .product-card .price {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    /* Скрываем кнопку "Подробнее" на мобильных */
+    .product-card .btn-primary {
+        display: none;
+    }
+
+    /* Изменяем стиль разделителя */
+    .col-md-3:not(:last-child) .product-card {
+        margin-bottom: 1rem;
+    }
+
+    /* Отступы для колонок на мобильных */
+    .col-md-3 {
+        padding: 0 1rem;
+    }
+
+    /* Отступы для рядов на мобильных */
+    .row.g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 0;
+        margin: 0 -0.5rem;
+    }
+}
+
+/* Стили для блока информации о доставке */
+.delivery-info {
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+    border-bottom: 1px solid #eee;
+    padding: 1rem 0;
+    overflow: hidden;
+}
+
+.delivery-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+}
+
+.delivery-item {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+}
+
+.delivery-item i {
+    color: var(--primary-color);
+    margin-right: 1rem;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delivery-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.delivery-text strong {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    font-family: var(--font-headers);
+    font-weight: 600;
+}
+
+.delivery-text span {
+    color: #6c757d;
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+/* Мобильная и планшетная версии */
+@media (max-width: 991px) {
+    .delivery-info {
+        position: relative;
+        padding: 0.5rem 0;
+        background: #f8f9fa;
+        overflow: hidden;
+    }
+  
+    .delivery-grid {
+        display: flex;
+        width: max-content;
+        padding: 0.375rem;
+        transform: translateX(0);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+        gap: 1rem;
+    }
+  
+    .delivery-item {
+        background: white;
+        padding: 0.1rem 0.75rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        width: 280px;
+        flex-shrink: 0;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+    }
+  
+    .delivery-item i {
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+        opacity: 0.9;
+    }
+  
+    .delivery-text {
+        flex: 1;
+        min-width: 0;
+        line-height: 1.2;
+    }
+  
+    .delivery-text strong {
+        font-size: 0.85rem;
+        margin-bottom: 0.125rem;
+        display: block;
+        color: var(--secondary-color);
+        font-weight: 600;
+    }
+  
+    .delivery-text span {
+        font-size: 0.7rem;
+        color: #6c757d;
+        opacity: 0.85;
+        display: block;
+    }
+}
+
+/* Десктопная версия */
+@media (min-width: 992px) {
+    .delivery-grid {
+        padding: 0;
+        transform: none !important;
+        transition: none !important;
+        will-change: auto;
+    }
+    
+    .delivery-item {
+        margin-right: 0;
+        transition: none;
+    }
+
+    .mobile-duplicates {
+        display: none;
+    }
+
+    .delivery-text strong,
+    .delivery-text span {
+        white-space: normal;
+    }
+}
+
+/* Средние экраны */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .delivery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Общие стили для всех контейнеров */
+.container {
+    max-width: 1200px !important;  /* Фиксированная ширина для всех контейнеров */
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Добавляем отступ для секций, чтобы учесть фиксированное меню */
+section[id] {
+    scroll-margin-top: 80px;
+}
+
+/* Новые стили для содержимого всплывающего окна */
+.nutrition-content {
+    font-size: 0.875rem;
+}
+
+.nutrition-content .title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.nutrition-content .nutrition-list {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem;
+}
+
+.nutrition-content .nutrition-label {
+    color: #6c757d;
+}
+
+.nutrition-content .nutrition-value {
+    text-align: right;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+/* Стили для всплывающего окна на десктопе */
+@media (min-width: 769px) {
+    .product-title-container {
+        position: relative;
+    }
+
+    .nutrition-popup {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 1rem;
+        z-index: 1030;
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        width: 300px;
+        max-width: calc(100vw - 2rem);
+    }
+
+    .nutrition-popup::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid white;
+    }
+}
+
+/* Общие стили для кнопок */
+.btn {
+    border-radius: 50px;  /* Делаем все кнопки более скругленными по умолчанию */
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+/* Маленькие кнопки */
+.btn-sm {
+    border-radius: 50px;
+    padding: 0.25rem 0.75rem;
+}
+
+/* Большие кнопки */
+.btn-lg {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+}
+
+/* Кнопки в группах */
+.btn-group .btn:first-child {
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+}
+
+/* Кнопки в input-group */
+.input-group .btn {
+    border-radius: 50px;
+    margin: 0 0.25rem;
+}
+
+/* Кнопки в карточках */
+.card .btn {
+    border-radius: 50px;
+}
+
+/* Кнопки в модальных окнах */
+.modal-footer {
+    padding: 1rem;
+    background: #fff;
+}
+
+/* Кнопка корзины */
+.floating-cart-button {
+    border-radius: 50px;
+}
+
+/* Кнопки выбора размера и теста */
+.size-option,
+.dough-option {
+    border-radius: 14px;
+}
+
+/* Стили для кнопок */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+    background-color: #bf2918 !important;
+    border-color: #bf2918 !important;
+    color: white;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Цвета текста */
+.price {
+    color: var(--primary-color);
+    font-family: var(--font-headers);
+    font-weight: 600;
+}
+
+.nutrition-content .title {
+    color: var(--text-color);
+}
+
+.nutrition-content .nutrition-value {
+    color: var(--text-color);
+}
+
+/* Фоны */
+.popular-product-card {
+    background: var(--accent-color);
+}
+
+/* Цвета для выбранных элементов */
+.topping-card .form-check-input:checked + .form-check-label {
+    background-color: rgba(212, 46, 26, 0.05);
+}
+
+.topping-card:has(.form-check-input:checked) {
+    border-color: var(--primary-color);
+    background-color: rgba(212, 46, 26, 0.05);
+}
+
+/* Цвета для бейджей */
+.badge.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+/* Переопределяем стандартные цвета Bootstrap */
+:root {
+    --bs-primary: var(--primary-color);
+    --bs-primary-rgb: 212, 46, 26;
+}
+
+/* Обновляем все элементы, использующие стандартные цвета Bootstrap */
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+/* Кнопки в корзине */
+.cart-item .input-group.input-group-sm .btn {
+    border-radius: 50px;
+}
+
+/* Кнопка "Изменить" в корзине */
+.cart-item .btn-link {
+    border-radius: 50px;
+}
+
+/* Кнопка оформления заказа */
+.cart-modal .btn-primary {
+    border-radius: 50px;
+}
+
+/* Стили для контейнера изображения в модальном окне */
+.col-12.col-md-6.mb-3.mb-md-0 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Стили для самого изображения */
+.img-fluid.rounded.w-100.h-auto {
+    max-height: 400px;  /* Ограничиваем максимальную высоту */
+    width: auto !important;  /* Переопределяем w-100 */
+    object-fit: contain;  /* Сохраняем пропорции */
+}
+
+/* Медиа-запрос для мобильных устройств */
+@media (max-width: 767px) {
+    .img-fluid.rounded.w-100.h-auto {
+        width: 100% !important;
+        max-height: 300px;  /* Меньшая высота для мобильных */
+    }
+}
+
+/* Стили для карточек специй */
+.condiment-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.2s;
+    min-height: 220px; /* Фиксированная минимальная высота для всех карточек */
+}
+
+.condiment-card:hover {
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.condiment-image {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 120px; /* Фиксированная высота для изображений */
+}
+
+.condiment-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.condiment-info {
+    flex-grow: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.condiment-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.condiment-price {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.quantity-controls .btn {
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.quantity-controls .mx-2 {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.cart-item-ingredients {
+    margin-bottom: 0.25rem;
+}
+
+.cart-item-condiments {
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+}
+
+/* Стили для кнопки корзины в хедере */
+header .btn-outline-primary {
+    width: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+/* Увеличиваем размер иконки корзины на десктопе */
+@media (min-width: 992px) {
+    header .btn-outline-primary .bi-cart3 {
+        font-size: 2rem;
+    }
+    
+    header .btn-outline-primary {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Стили для бейджа в кнопке корзины */
+header .btn-outline-primary .position-absolute.badge.rounded-pill.bg-danger {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    transform: none !important;
+    border: 2px solid #fff;
+    z-index: 1;
+}
+
+/* Отключаем стандартное позиционирование Bootstrap */
+.translate-middle {
+    transform: none !important;
+}

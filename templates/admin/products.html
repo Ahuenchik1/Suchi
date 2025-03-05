@@ -1,0 +1,259 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Управление продуктами</h2>
+        <button class="btn btn-primary" 
+                @click="getCategoryName(activeCategory) === 'Добавки' ? showAddToppingModal() : showAddModal()">
+            <i class="bi bi-plus-lg"></i> 
+            {% raw %}{{ getCategoryName(activeCategory) === 'Добавки' ? 'Добавить добавку' : 'Добавить продукт' }}{% endraw %}
+        </button>
+    </div>
+
+    <!-- Навигация по категориям -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item" v-for="category in categories" :key="category.id">
+            <button class="nav-link" 
+                    :class="{ active: activeCategory === category.id }"
+                    @click="activeCategory = category.id">
+                {% raw %}{{ category.name }}{% endraw %}
+            </button>
+        </li>
+    </ul>
+
+    <!-- Алерты -->
+    <div v-if="alert" :class="['alert', `alert-${alert.type}`]" role="alert">
+        {% raw %}{{ alert.message }}{% endraw %}
+    </div>
+
+    <!-- Таблица продуктов текущей категории -->
+    <div v-if="activeCategory" class="table-responsive">
+        <h3 class="h5 mb-3">{% raw %}{{ getCategoryName(activeCategory) }}{% endraw %}</h3>
+        
+        <!-- Специальный интерфейс для категории добавок -->
+        <template v-if="getCategoryName(activeCategory) === 'Добавки'">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Фото</th>
+                            <th>Название</th>
+                            <th>Цена</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="topping in toppings" :key="topping.id">
+                            <td>
+                                <img :src="topping.image_path" 
+                                     width="50" 
+                                     height="50" 
+                                     :alt="topping.name">
+                            </td>
+                            <td>{% raw %}{{ topping.name }}{% endraw %}</td>
+                            <td>{% raw %}{{ topping.price }}{% endraw %} ₽</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            @click="editTopping(topping)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            @click="deleteTopping(topping.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        
+        <!-- Стандартная таблица для остальных категорий -->
+        <template v-else>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Фото</th>
+                        <th>Название</th>
+                        <th>Описание</th>
+                        <th>Цена</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="product in filteredProducts" :key="product.id">
+                        <td>
+                            <img :src="product.image_path" 
+                                 width="50" 
+                                 height="50" 
+                                 :alt="product.name">
+                        </td>
+                        <td>{% raw %}{{ product.name }}{% endraw %}</td>
+                        <td>{% raw %}{{ product.description }}{% endraw %}</td>
+                        <td>{% raw %}{{ product.price }}{% endraw %} ₽</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        @click="editProduct(product)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        @click="deleteProduct(product.id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </template>
+    </div>
+
+    <!-- Модальное окно добавления/редактирования продукта -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% raw %}{{ isEditing ? 'Редактировать' : 'Добавить' }}{% endraw %} продукт</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <div class="mb-3">
+                            <label class="form-label">Категория</label>
+                            <select class="form-select" 
+                                    v-model="currentProduct.category_id" 
+                                    @change="selectedCategory = categories.find(c => c.id === currentProduct.category_id)"
+                                    required>
+                                <option v-for="category in categories" 
+                                        :key="category.id" 
+                                        :value="category.id">
+                                    {% raw %}{{ category.name }}{% endraw %}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Название</label>
+                            <input type="text" class="form-control" v-model="currentProduct.name" required>
+                        </div>
+                        <div class="mb-3" v-if="selectedCategory?.slug !== 'toppings'">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-control" v-model="currentProduct.description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Цена</label>
+                            <input type="number" class="form-control" v-model="currentProduct.price" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Изображение</label>
+                            <input type="file" class="form-control" ref="imageInput" @change="handleImageChange" accept="image/*">
+                            <img v-if="imagePreview" :src="imagePreview" class="image-preview mt-2">
+                        </div>
+
+                        <div v-if="['pizza', 'futomaki', 'uramaki', 'hot_rolls', 'classic_sushi', 'spicy_sushi']
+                             .includes(selectedCategory?.slug)" 
+                             class="mb-3">
+                            <label class="form-label">Ингредиенты</label>
+                            <div class="ingredients-list">
+                                <div v-for="(ingredient, index) in productIngredients" 
+                                     :key="index" 
+                                     class="ingredient-item d-flex gap-2 mb-2">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           v-model="ingredient.name" 
+                                           placeholder="Название ингредиента">
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               v-model="ingredient.is_default">
+                                        <label class="form-check-label">По умолчанию</label>
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-outline-danger btn-sm"
+                                            @click="removeIngredient(index)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" 
+                                    class="btn btn-outline-primary btn-sm mt-2"
+                                    @click="addIngredient">
+                                <i class="bi bi-plus"></i> Добавить ингредиент
+                            </button>
+                        </div>
+
+                        <div class="mb-3" v-if="isEditing && selectedCategory?.slug !== 'toppings'">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" v-model="currentProduct.is_available">
+                                <label class="form-check-label">Активен</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary" @click="saveProduct" :disabled="loading">
+                        <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
+                        {% raw %}{{ isEditing ? 'Сохранить' : 'Добавить' }}{% endraw %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для добавок -->
+    <div class="modal fade" id="toppingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {% raw %}{{ isEditing ? 'Редактировать добавку' : 'Добавить добавку' }}{% endraw %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="toppingForm" @submit.prevent="saveTopping">
+                        <div class="mb-3">
+                            <label class="form-label">Название</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   v-model="currentTopping.name" 
+                                   required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Цена</label>
+                            <input type="number" 
+                                   class="form-control" 
+                                   v-model="currentTopping.price" 
+                                   step="0.01"
+                                   required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Изображение</label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   ref="toppingImageInput"
+                                   name="image"
+                                   accept="image/*">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" 
+                            class="btn btn-secondary" 
+                            data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" 
+                            class="btn btn-primary" 
+                            form="toppingForm" 
+                            :disabled="loading">
+                        {% raw %}{{ isEditing ? 'Сохранить' : 'Добавить' }}{% endraw %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

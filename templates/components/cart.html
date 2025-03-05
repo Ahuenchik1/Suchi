@@ -1,0 +1,15 @@
+                    <div class="cart-item-details">
+                        <h6 class="mb-1">{% raw %}{{ item.name }}{% endraw %}</h6>
+                        <!-- Ингредиенты -->
+                        <div v-if="item.ingredients && item.ingredients.length" class="ingredients-list mb-1">
+                            <span v-for="(ingredient, index) in item.ingredients" 
+                                  :key="index" 
+                                  class="ingredient-item">
+                                {% raw %}{{ ingredient }}{% endraw %}
+                            </span>
+                        </div>
+                        <!-- Опции для пиццы -->
+                        <div v-if="item.options.size" class="small text-muted">
+                            {% raw %}{{ item.options.size.value }}{% endraw %} см, 
+                            {% raw %}{{ item.options.dough.name }}{% endraw %} тесто
+                        </div> 

@@ -1,0 +1,28 @@
+.order-success-page {
+    padding: 2rem 0;
+    position: relative;
+    z-index: 1;
+}
+
+.qr-code {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.qr-code img {
+    width: 100%;
+    height: auto;
+}
+
+.payment-info {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.order-info {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+} 
